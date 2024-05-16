@@ -12,7 +12,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::where('user_id', auth()->user()->id)->get();
+        $categories = Category::with('todo')->where('user_id', auth()->user()->id)->get();
+
         return view('category.index', compact('categories'));
     }
 
@@ -30,11 +31,11 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|max:255'
+            'title' => 'required|max:255',
         ]);
         Category::create([
             'user_id' => auth()->user()->id,
-            'title' => $request->title
+            'title' => $request->title,
         ]);
 
         return redirect()->route('category.index')->with('success', 'Category created successfully!');
@@ -77,6 +78,7 @@ class CategoryController extends Controller
         $category->update([
             'title' => ucfirst($request->title),
         ]);
+
         return redirect()->route('category.index')->with('success', 'Todo category updated successfully!');
     }
 
@@ -87,6 +89,7 @@ class CategoryController extends Controller
     {
         if (auth()->user()->id == $category->user_id) {
             $category->delete();
+
             return redirect()->route('category.index')->with('success', 'Category deleted successfully!');
         } else {
             return redirect()->route('category.index')->with('danger', 'You are not authorized to delete this category!');
